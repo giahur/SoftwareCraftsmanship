@@ -3,6 +3,7 @@ package matrix;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import java.util.List;
 import org.junit.Test;
 
@@ -14,6 +15,7 @@ public class TestIndexes {
     Indexes index3 = new Indexes(3, 1);
     Indexes index4 = new Indexes(3, 3);
     Indexes index5 = new Indexes(3, 5);
+    // test w biginteger bigdouble
 
     @Test
     public void testWithRowColumn() {
@@ -52,8 +54,7 @@ public class TestIndexes {
 
     @Test
     public void testDiagonal() {
-        //assertFalse(index1.areDiagonal());
-        assertEquals(false, index1.areDiagonal());
+        assertFalse(index1.areDiagonal());
         assertTrue(index4.areDiagonal());
     }
 

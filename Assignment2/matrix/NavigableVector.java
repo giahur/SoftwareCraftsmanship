@@ -23,5 +23,5 @@ public final class NavigableVector<T> extends AbstractMatrix<Integer, T> {
         }
         return new NavigableVector<>(noZero, zero);
 
-    }
+    } //stream filter instead of for each, collect
 }
