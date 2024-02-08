@@ -10,7 +10,6 @@ public abstract class AbstractMatrix<I, T> implements Matrix<I,T> {
 
     protected AbstractMatrix(NavigableMap<I, T> matrix, T zero) {
         this.matrix = matrix;
-        //this.matrix = Collections.unmodifiableNavigableMap(matrix);
         this.zero = zero;
     }
 

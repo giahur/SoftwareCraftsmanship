@@ -49,7 +49,7 @@ public class TestIndexes {
         assertEquals(Integer.valueOf(10),index1.value(myMatrix));
         assertEquals(Integer.valueOf(8),index2.value(myMatrix));
         assertEquals(Integer.valueOf(0), myOrigin.value(myMatrix));
-        assertThrows(NullPointerException.class, () -> index1.value(null));
+        assertThrows(NullPointerException.class, () -> index1.value((Matrix)null));
     }
 
     @Test
