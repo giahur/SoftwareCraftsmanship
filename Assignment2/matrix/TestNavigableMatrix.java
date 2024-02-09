@@ -7,6 +7,7 @@ import java.util.TreeMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import matrix.NavigableMatrix.InvalidLengthException;
@@ -51,13 +52,16 @@ public class TestNavigableMatrix {
     public void testPeekingIterator() {
         NavigableMatrix<Integer> matrix = myMatrix();
         PeekingIterator<Map.Entry<Indexes, Integer>> iterator = matrix.peekingIterator();
+        assertTrue(iterator.hasNext());
+        assertEquals((Integer)1, iterator.next().getValue());
+        assertEquals((Integer)2, iterator.peek().getValue());
+        assertEquals((Integer)2, iterator.next().getValue());
+        assertEquals((Integer)3, iterator.element().getValue());
+        assertEquals((Integer)3, iterator.next().getValue());
         assertFalse(iterator.hasNext());
         assertThrows(NoSuchElementException.class, () -> iterator.next());
         assertEquals(null, iterator.peek());
         assertThrows(NoSuchElementException.class, () -> iterator.element());
-        //assertTrue(iterator.hasNext());
-        //assertEquals((Integer)2, iterator.peek().getValue());
-        //assertEquals((Integer)3, iterator.element().getValue());
     }
 
     @Test
@@ -127,6 +131,4 @@ public class TestNavigableMatrix {
         assertThrows(NullPointerException.class, () -> NavigableMatrix.from(nullArray, 0));
         assertThrows(NullPointerException.class, () -> NavigableMatrix.from(array, null));
     }
-
-    
-    }
+}

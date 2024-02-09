@@ -25,12 +25,8 @@ public class TestPeekingIterator {
 
         List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
         PeekingIterator<Integer> iterator = PeekingIterator.from(list.iterator());
-        assertFalse(iterator.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iterator.next());
-        assertEquals(null, iterator.peek());
-        assertThrows(NoSuchElementException.class, () -> iterator.element());
 
-        /*assertTrue(iterator.hasNext());
+        assertTrue(iterator.hasNext());
         assertEquals((Integer)1, iterator.peek());
         assertEquals((Integer)1, iterator.next());
         assertEquals((Integer)2, iterator.next());
@@ -40,8 +36,13 @@ public class TestPeekingIterator {
         assertEquals((Integer)5, iterator.next());
         assertFalse(iterator.hasNext());
 
+        assertFalse(iterator.hasNext());
         assertThrows(NoSuchElementException.class, () -> iterator.next());
-        assertThrows(NoSuchElementException.class, () -> iterator.peek());*/
+        assertEquals(null, iterator.peek());
+        assertThrows(NoSuchElementException.class, () -> iterator.element());
+
+        assertThrows(NoSuchElementException.class, () -> iterator.next());
+        assertEquals(null, iterator.peek());
 
         
     }
