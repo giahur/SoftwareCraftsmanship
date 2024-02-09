@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import java.util.Objects;
 
 public final class NavigableVector<T> extends AbstractMatrix<Integer, T> {
-    private NavigableVector(NavigableMap<Integer, T> matrix, T zero) {
+    protected NavigableVector(NavigableMap<Integer, T> matrix, T zero) {
         super(matrix, zero);
     }
 

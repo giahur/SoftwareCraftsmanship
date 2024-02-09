@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import java.util.List;
+
 import org.junit.Test;
 
 public class TestIndexes {
@@ -15,7 +16,6 @@ public class TestIndexes {
     Indexes index3 = new Indexes(3, 1);
     Indexes index4 = new Indexes(3, 3);
     Indexes index5 = new Indexes(3, 5);
-    // test w biginteger bigdouble
 
     @Test
     public void testWithRowColumn() {
@@ -44,12 +44,26 @@ public class TestIndexes {
     }
 
     @Test
-    public void testValue() {
+    public void testValueArray() {
         Integer[][] myMatrix = {{0, 1, 2, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}};
         assertEquals(Integer.valueOf(10),index1.value(myMatrix));
         assertEquals(Integer.valueOf(8),index2.value(myMatrix));
         assertEquals(Integer.valueOf(0), myOrigin.value(myMatrix));
-        assertThrows(NullPointerException.class, () -> index1.value((Matrix)null));
+
+        Integer[][] nullMatrix = null;
+        assertThrows(NullPointerException.class, () -> index1.value(nullMatrix));
+    }
+
+    @Test
+    public void testValueMatrix() {
+        Integer[][] myMatrix = {{0, 1, 2, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}};
+        NavigableMatrix<Integer> matrix = NavigableMatrix.from(myMatrix, 0);
+        assertEquals(Integer.valueOf(10),index1.value(matrix));
+        assertEquals(Integer.valueOf(8),index2.value(matrix));
+        assertEquals(Integer.valueOf(0), myOrigin.value(matrix));
+
+        NavigableMatrix<Integer> nullMatrix = null;
+        assertThrows(NullPointerException.class, () -> index1.value(nullMatrix));
     }
 
     @Test

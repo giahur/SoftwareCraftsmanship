@@ -13,7 +13,7 @@ public final class NavigableMatrix<T> implements Matrix<Indexes, T> {
     private final NavigableMap<Indexes, T> matrix;
     private final T zero;
     
-    private NavigableMatrix(NavigableMap<Indexes, T> matrix, T zero) {
+    protected NavigableMatrix(NavigableMap<Indexes, T> matrix, T zero) {
         this.matrix = matrix;
         this.zero = zero;
     }
@@ -113,6 +113,7 @@ public final class NavigableMatrix<T> implements Matrix<Indexes, T> {
 
         return new NavigableMatrix<S>(matrix, zero);
     }
+    
     public static <S> NavigableMatrix<S> from(S[][] matrix, S zero) {
         Objects.requireNonNull(matrix);
         Objects.requireNonNull(zero);
