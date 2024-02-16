@@ -1,8 +1,10 @@
 package matrix;
 
+import java.util.Comparator;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
+import java.util.function.BinaryOperator;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.Objects;
@@ -10,6 +12,15 @@ import java.util.Objects;
 public final class NavigableVector<T> extends AbstractMatrix<Integer, T> {
     protected NavigableVector(NavigableMap<Integer, T> matrix, T zero) {
         super(matrix, zero);
+    }
+
+    @Override
+    public Matrix<Integer, T> merge(Matrix<Integer, T> other, BinaryOperator<T> op) {
+        Objects.requireNonNull(other);
+        Objects.requireNonNull(op);
+        NavigableMap<Integer, T> map = MapMerger.merge(this.peekingIterator(), other.peekingIterator(), Comparator.naturalOrder(), op, 0, zero());
+        InconsistentZeroException.requireMatching(this, other);
+        return new NavigableVector<T>(map, zero());
     }
 
     @Override

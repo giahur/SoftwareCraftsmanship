@@ -17,10 +17,7 @@ public abstract class AbstractMatrix<I, T> implements Matrix<I,T> {
     @Override
     public T value(I index) {
         Objects.requireNonNull(index);
-        if(!matrix.containsKey(index)) {
-            throw new IndexOutOfBoundsException("Index doesn't exist");
-        }
-        return matrix.get(index);
+        return matrix.getOrDefault(index, zero());
     }
 
     // represents value 0 for type T

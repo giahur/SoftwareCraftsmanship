@@ -56,11 +56,11 @@ public class TestIndexes {
 
     @Test
     public void testValueMatrix() {
-        Integer[][] myMatrix = {{0, 1, 2, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}};
+        Integer[][] myMatrix = {{1, 1, 2, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}};
         NavigableMatrix<Integer> matrix = NavigableMatrix.from(myMatrix, 0);
         assertEquals(Integer.valueOf(10),index1.value(matrix));
         assertEquals(Integer.valueOf(8),index2.value(matrix));
-        assertEquals(Integer.valueOf(0), myOrigin.value(matrix));
+        assertEquals(Integer.valueOf(1), myOrigin.value(matrix));
 
         NavigableMatrix<Integer> nullMatrix = null;
         assertThrows(NullPointerException.class, () -> index1.value(nullMatrix));

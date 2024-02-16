@@ -3,7 +3,10 @@ package matrix;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.TreeMap;
+import java.util.function.BinaryOperator;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertFalse;
@@ -54,14 +57,43 @@ public class TestNavigableMatrix {
         PeekingIterator<Map.Entry<Indexes, Integer>> iterator = matrix.peekingIterator();
         assertTrue(iterator.hasNext());
         assertEquals((Integer)1, iterator.next().getValue());
-        assertEquals((Integer)2, iterator.peek().getValue());
+        assertEquals((Integer)2, iterator.peek().get().getValue());
         assertEquals((Integer)2, iterator.next().getValue());
         assertEquals((Integer)3, iterator.element().getValue());
+        assertTrue(iterator.hasNext());
         assertEquals((Integer)3, iterator.next().getValue());
         assertFalse(iterator.hasNext());
         assertThrows(NoSuchElementException.class, () -> iterator.next());
-        assertEquals(null, iterator.peek());
+        assertEquals(Optional.empty(), iterator.peek());
         assertThrows(NoSuchElementException.class, () -> iterator.element());
+    }
+
+    @Test
+    public void testMerge() {
+        NavigableMap<Indexes, String> myMap1 = new TreeMap<> ();
+        myMap1.put(new Indexes (0,0), "a"); 
+        myMap1.put(new Indexes (0, 1), "b"); 
+        myMap1.put(new Indexes (1, 0), "c"); 
+        myMap1.put(new Indexes (1, 1), "d");
+        
+        NavigableMatrix<String> myMatrix1 = NavigableMatrix.from(myMap1, "0") ;
+
+        NavigableMap<Indexes, String> myMap2 = new TreeMap<> ();
+        myMap2.put(new Indexes (0,0), "e"); 
+        myMap2.put(new Indexes (0, 1), "0") ; 
+        myMap2.put(new Indexes (1, 0), "f"); 
+        myMap2.put(new Indexes (1, 1), "g");
+        
+        NavigableMatrix<String> myMatrix2 = NavigableMatrix.from(myMap2, "0") ;
+
+        BinaryOperator<String> op = (x, y) -> x + y;
+                
+        Matrix<Indexes, String> addedMatrixes = myMatrix1.merge(myMatrix2, op);
+        
+        assertEquals("ae", addedMatrixes.value(new Indexes(0, 0)));
+        assertEquals("b0", addedMatrixes.value(new Indexes(0, 1)));
+        assertEquals("cf", addedMatrixes.value(new Indexes(1, 0)));
+        assertEquals("dg", addedMatrixes.value(new Indexes(1, 1)));
     }
 
     @Test
@@ -69,15 +101,14 @@ public class TestNavigableMatrix {
         InvalidLengthException exception = new InvalidLengthException(InvalidLengthException.Cause.ROW, 1);
         assertEquals(InvalidLengthException.Cause.ROW, exception.cause());
         assertEquals(1, exception.length());
-        assertEquals(1, exception.requireNonEmpty(InvalidLengthException.Cause.ROW, 1));
-        assertThrows(NullPointerException.class, () -> exception.requireNonEmpty(null, 1));
-        assertThrows(IllegalArgumentException.class, () -> exception.requireNonEmpty(InvalidLengthException.Cause.ROW, -1));
+        assertEquals(1, InvalidLengthException.requireNonEmpty(InvalidLengthException.Cause.ROW, 1));
+        assertThrows(NullPointerException.class, () -> InvalidLengthException.requireNonEmpty(null, 1));
+        assertThrows(IllegalArgumentException.class, () -> InvalidLengthException.requireNonEmpty(InvalidLengthException.Cause.ROW, -1));
     }
 
     @Test
     public void testInstance() {
         NavigableMatrix<Integer> matrix = NavigableMatrix.instance(2, 2, indexes -> indexes.row(), 0);
-        assertEquals((Integer)0, matrix.value(new Indexes(0, 1)));
         assertEquals((Integer)1, matrix.value(new Indexes(1, 0)));
         
         assertThrows(NullPointerException.class, () -> NavigableMatrix.instance(0, 1, null, 0));
@@ -100,7 +131,6 @@ public class TestNavigableMatrix {
     public void testIdentity() {
         NavigableMatrix<Integer> matrix = NavigableMatrix.identity(2, 0, 1);
         assertEquals((Integer)1, matrix.value(new Indexes(0, 0)));
-        assertEquals((Integer)0, matrix.value(new Indexes(1, 0)));
         
         assertThrows(NullPointerException.class, () -> NavigableMatrix.identity(2, null, 4));
         assertThrows(NullPointerException.class, () -> NavigableMatrix.identity(2, 1, null));

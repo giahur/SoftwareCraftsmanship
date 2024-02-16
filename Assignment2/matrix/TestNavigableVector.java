@@ -5,12 +5,38 @@ import java.util.NavigableMap;
 import java.util.Map;
 import org.junit.Test;
 import java.util.TreeMap;
+import java.util.function.BinaryOperator;
+
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 public class TestNavigableVector {
+
+    @Test 
+    public void testMerge() {
+        NavigableMap<Integer, String> myMap1 = new TreeMap<>();
+        myMap1.put(1, "a");
+        myMap1.put(2, "b");
+        myMap1.put(3, "");
+        NavigableVector<String> myVector1 = NavigableVector.from(myMap1, "");
+
+        NavigableMap<Integer, String> myMap2 = new TreeMap<>();
+        myMap2.put(1, "c");
+        myMap2.put(2, "");
+        myMap2.put(3, "d");
+        NavigableVector<String> myVector2 = NavigableVector.from(myMap2, "");
+        
+        BinaryOperator<String> op = (x, y) -> x + y;
+                
+        Matrix<Integer, String> addedVectors = myVector1.merge(myVector2, op);
+        
+        assertEquals("ac", addedVectors.value(1));
+        assertEquals("b", addedVectors.value(2));
+        assertEquals("d", addedVectors.value(3));
+    }
 
     @Test
     public void testPeekingIterator() {
@@ -22,7 +48,7 @@ public class TestNavigableVector {
 
         PeekingIterator<Map.Entry<Integer, String>> iterator = myMapZero.peekingIterator();
         assertTrue(iterator.hasNext());
-        assertEquals("one", iterator.peek().getValue());
+        assertEquals("one", iterator.peek().get().getValue());
         assertEquals("one", iterator.next().getValue());
         assertEquals("two", iterator.element().getValue());
         assertTrue(iterator.hasNext());
@@ -30,7 +56,7 @@ public class TestNavigableVector {
         assertFalse(iterator.hasNext());
         
         assertThrows(NoSuchElementException.class, () -> iterator.next());
-        assertEquals(null, iterator.peek());
+        assertEquals(Optional.empty(), iterator.peek());
         assertThrows(NoSuchElementException.class, () -> iterator.element());
     }
     

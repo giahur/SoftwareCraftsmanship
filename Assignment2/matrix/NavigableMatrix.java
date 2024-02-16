@@ -1,10 +1,12 @@
 package matrix;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.Objects;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -39,11 +41,18 @@ public final class NavigableMatrix<T> implements Matrix<Indexes, T> {
 
     @Override
     public PeekingIterator<Map.Entry<Indexes,T>> peekingIterator() {
-        return PeekingIterator.from(matrix.entrySet().iterator());
+        return PeekingIterator.from(matrix.entrySet());
+    }
+
+    @Override
+    public Matrix<Indexes, T> merge(Matrix<Indexes, T> other, BinaryOperator<T> op) {
+        NavigableMap<Indexes, T> map = MapMerger.merge(this.peekingIterator(), other.peekingIterator(), Comparator.naturalOrder(), op, Indexes.ORIGIN, zero());
+        InconsistentZeroException.requireMatching(this, other);
+        return new NavigableMatrix<T>(map, zero);
     }
 
     public static class InvalidLengthException extends Exception {
-        private static final long serialVersionUID = 221;
+        private static final long serialVersionUID = 123;
 
         public enum Cause {
             ROW, COLUMN
@@ -65,7 +74,7 @@ public final class NavigableMatrix<T> implements Matrix<Indexes, T> {
             return this.length;
         }
 
-        public int requireNonEmpty(Cause cause, int length) {
+        public static int requireNonEmpty(Cause cause, int length) {
             Objects.requireNonNull(cause);
             if (length <= 0) {
                 throw new IllegalArgumentException(new InvalidLengthException(cause, length));
@@ -78,10 +87,12 @@ public final class NavigableMatrix<T> implements Matrix<Indexes, T> {
         Objects.requireNonNull(valueMapper);
         Objects.requireNonNull(zero);
 
-        if(rows <= 0 || columns <= 0) {
-            throw new IllegalArgumentException("rows or columns cannot be less than 1");
-        }
-        Map<Indexes, S> myMap = Indexes.stream(rows, columns).collect(Collectors.toMap(x -> x, x -> valueMapper.apply((Indexes) x)));
+        InvalidLengthException.requireNonEmpty(InvalidLengthException.Cause.ROW, rows);
+        InvalidLengthException.requireNonEmpty(InvalidLengthException.Cause.COLUMN, columns);
+
+        Map<Indexes, S> myMap = Indexes.stream(rows, columns)
+                .filter(x -> !valueMapper.apply(x).equals(zero))
+                .collect(Collectors.toMap(x -> x, x -> valueMapper.apply((Indexes) x)));
         return new NavigableMatrix<S>(new TreeMap<Indexes, S>(myMap), zero);
     }
 
@@ -89,20 +100,12 @@ public final class NavigableMatrix<T> implements Matrix<Indexes, T> {
         Objects.requireNonNull(value);
         Objects.requireNonNull(zero);
 
-        if(rows <= 0 || columns <= 0) {
-            throw new IllegalArgumentException("rows or columns cannot be less than 1");
-        }
-
         return instance(rows, columns, indexes -> value, zero);
     }
 
     public static <S> NavigableMatrix<S> identity(int size, S zero, S identity) {
         Objects.requireNonNull(zero);
         Objects.requireNonNull(identity);
-
-        if(size < 1) {
-            throw new IllegalArgumentException("size must be positive");
-        }
 
         return instance(size, size, indexes -> indexes.areDiagonal() ? identity : zero, zero);
     }

@@ -11,7 +11,7 @@ public final class PeekingIterator<T> implements Iterator<T> {
 
     private PeekingIterator(Iterator<T> iterator) {
         this.it = iterator;
-        this.next = Optional.empty();
+        this.next = Optional.of(iterator.next());
     }
 
     public static <T> PeekingIterator<T> from(Iterator<T> iterator) {
@@ -24,32 +24,31 @@ public final class PeekingIterator<T> implements Iterator<T> {
 
     @Override
     public boolean hasNext() {
-        return next.isPresent() || it.hasNext();
+        return next.isPresent();
     }
 
     @Override
     public T next() {
-        if(!hasNext()) {
-            throw new NoSuchElementException("no next element");
-        }
-        T myNext = peek();
-        next = Optional.empty();
-        return myNext;
-    }
-
-    public T peek() {
-        if(!next.isPresent() && it.hasNext()) {
+        T value = next.get();
+        if(it.hasNext()) {
             next = Optional.of(it.next());
         }
-        return next.orElse(null);
+        else {
+            next = Optional.empty();
+        }
+        return value;
+    }
+
+    public Optional<T> peek() {
+        if(!hasNext()) {
+            return Optional.empty();
+        }
+        return next;
     }
 
     public T element() {
         if(!hasNext()) {
-            throw new NoSuchElementException("no next element");
-        }
-        if(!next.isPresent()) {
-            next = Optional.of(it.next());
+            throw new NoSuchElementException("No next element");
         }
         return next.get();
     }
