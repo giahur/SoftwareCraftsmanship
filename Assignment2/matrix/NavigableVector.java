@@ -19,7 +19,7 @@ public final class NavigableVector<T> extends AbstractMatrix<Integer, T> {
         Objects.requireNonNull(other);
         Objects.requireNonNull(op);
         NavigableMap<Integer, T> map = MapMerger.merge(this.peekingIterator(), other.peekingIterator(), Comparator.naturalOrder(), op, 0, zero());
-        InconsistentZeroException.requireMatching(this, other);
+        InconsistentZeroException.requireMatching(this, other); //call before merge
         return new NavigableVector<T>(map, zero());
     }
 

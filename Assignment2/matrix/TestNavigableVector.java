@@ -36,6 +36,26 @@ public class TestNavigableVector {
         assertEquals("ac", addedVectors.value(1));
         assertEquals("b", addedVectors.value(2));
         assertEquals("d", addedVectors.value(3));
+
+         NavigableMap<Integer, Integer> myMap3 = new TreeMap<>();
+        myMap3.put(1, 1);
+        myMap3.put(2, 2);
+        myMap3.put(3, 0);
+        NavigableVector<Integer> myVector3 = NavigableVector.from(myMap3, 0);
+
+        NavigableMap<Integer, Integer> myMap4 = new TreeMap<>();
+        myMap4.put(1, 3);
+        myMap4.put(2, 0);
+        myMap4.put(3, 5);
+        NavigableVector<Integer> myVector4 = NavigableVector.from(myMap4, 0);
+        
+        BinaryOperator<Integer> op2 = (x, y) -> x + y;
+                
+        Matrix<Integer, Integer> addedVectors2 = myVector3.merge(myVector4, op2);
+        
+        assertEquals((Integer)4, addedVectors2.value(1));
+        assertEquals((Integer)2, addedVectors2.value(2));
+        assertEquals((Integer)5, addedVectors2.value(3));
     }
 
     @Test

@@ -3,6 +3,7 @@ package matrix;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.Objects;
@@ -12,12 +13,17 @@ import java.util.stream.Collectors;
 
 public final class NavigableMatrix<T> implements Matrix<Indexes, T> {
     
-    private final NavigableMap<Indexes, T> matrix;
+    //private final NavigableMap<Indexes, T> matrix; delete??
     private final T zero;
+    private final NavigableMap<Indexes, T> matrixByColumns;
+    private final NavigableMap<Indexes, T> matrixByRows;
     
-    protected NavigableMatrix(NavigableMap<Indexes, T> matrix, T zero) {
-        this.matrix = matrix;
+    protected NavigableMatrix(NavigableMap<Indexes, T> matrixByRows, T zero) {
+        this.matrixByRows = Collections.unmodifiableNavigableMap(matrixByRows);
         this.zero = zero;
+
+        //CHANGE THIS... maybe helper method w argument matrixByRows
+        this.matrixByColumns = Collections.unmodifiableNavigableMap(matrixByRows);
     }
 
     @Override
@@ -36,7 +42,7 @@ public final class NavigableMatrix<T> implements Matrix<Indexes, T> {
 
     @Override
     public NavigableMap<Indexes, T> representation() {
-        return Collections.unmodifiableNavigableMap(matrix);
+        return Collections.unmodifiableNavigableMap(matrix); //change to matrixByColumns/Rows?
     }
 
     @Override
@@ -82,6 +88,32 @@ public final class NavigableMatrix<T> implements Matrix<Indexes, T> {
             return length;
         }
     }
+
+    // returns entries where row = i, keys are columns
+    public NavigableVector<T> row(int i) {
+        NavigableMap<Integer, T> rowMap = matrixByColumns.entrySet()
+                                                .stream()
+                                                .filter(entry -> entry.getKey().row() == i)
+                                                .collect(Collectors.toMap(entry -> entry.getKey().column(), Entry::getValue, (a,b) -> a, TreeMap::new));
+        return new NavigableVector<T>(rowMap, zero);
+    }
+
+    public NavigableVector<T> column(int j) {
+        NavigableMap<Integer, T> columnMap = matrixByRows.entrySet()
+                                                .stream()
+                                                .filter(entry -> entry.getKey().column() == j)
+                                                .collect(Collectors.toMap(entry -> entry.getKey().row(), Entry::getValue, (a,b) -> a, TreeMap::new));
+        return new NavigableVector<T>(columnMap, zero);
+    }
+
+    //repeated code??
+    /*public NavigableVector<T> rowColumn(NavigableMap<Indexes, T> matrixBy, int rowColumn, int ij, int columnRow) {
+        NavigableMap<Integer, T> rowColumnMap = matrixBy.entrySet()
+                                                .stream()
+                                                .filter(entry -> entry.getKey().rowColumn == ij)
+                                                .collect(Collectors.toMap(entry -> entry.getKey().columnRow, Entry::getValue, (a,b) -> a, TreeMap::new));
+        return new NavigableVector<T>(rowColumnMap, zero);
+    } */
 
     public static <S> NavigableMatrix<S> instance(int rows, int columns, Function<Indexes, S> valueMapper, S zero) {
         Objects.requireNonNull(valueMapper);

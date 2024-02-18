@@ -1,7 +1,6 @@
 package matrix;
 
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public final class PeekingIterator<T> implements Iterator<T> {
@@ -47,9 +46,6 @@ public final class PeekingIterator<T> implements Iterator<T> {
     }
 
     public T element() {
-        if(!hasNext()) {
-            throw new NoSuchElementException("No next element");
-        }
         return next.get();
     }
 }

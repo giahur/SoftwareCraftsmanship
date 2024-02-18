@@ -94,6 +94,25 @@ public class TestNavigableMatrix {
         assertEquals("b0", addedMatrixes.value(new Indexes(0, 1)));
         assertEquals("cf", addedMatrixes.value(new Indexes(1, 0)));
         assertEquals("dg", addedMatrixes.value(new Indexes(1, 1)));
+
+        NavigableMap<Indexes, Integer> myMap3 = new TreeMap<> ();
+        myMap3.put(new Indexes (0,0), 1); 
+        myMap3.put(new Indexes (0, 1), 2); 
+        
+        NavigableMatrix<Integer> myMatrix3 = NavigableMatrix.from(myMap3, 0) ;
+
+        NavigableMap<Indexes, Integer> myMap4 = new TreeMap<> ();
+        myMap4.put(new Indexes (0, 0), 0); 
+        myMap4.put(new Indexes (0, 1), 5); 
+        
+        NavigableMatrix<Integer> myMatrix4 = NavigableMatrix.from(myMap4, 0) ;
+
+        BinaryOperator<Integer> op2 = (x, y) -> x + y;
+                
+        Matrix<Indexes, Integer> addedMatrixes2 = myMatrix3.merge(myMatrix4, op2);
+        
+        assertEquals((Integer)1, addedMatrixes2.value(new Indexes(0, 0)));
+        assertEquals((Integer)7, addedMatrixes2.value(new Indexes(0, 1)));
     }
 
     @Test

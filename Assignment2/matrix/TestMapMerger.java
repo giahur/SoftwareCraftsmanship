@@ -38,5 +38,30 @@ public class TestMapMerger {
         assertEquals("BY", result.get(2));
         assertEquals("C0", result.get(3));
         assertEquals("0Z", result.get(4));
+
+
+        List<Map.Entry<Integer, Integer>> list3 = Arrays.asList(
+            Map.entry(1, 1),
+            Map.entry(2, 2),
+            Map.entry(3, 3)
+        );
+        
+        List<Map.Entry<Integer, Integer>> list4 = Arrays.asList(
+            Map.entry(1, 1),
+            Map.entry(2, 0),
+            Map.entry(3, 3)
+        );
+        
+        PeekingIterator<Map.Entry<Integer, Integer>> itThis2 = PeekingIterator.from(list3.iterator());
+        PeekingIterator<Map.Entry<Integer, Integer>> itOther2 = PeekingIterator.from(list4.iterator());
+        
+        Comparator<Integer> comparator2 = Comparator.naturalOrder();
+        BinaryOperator<Integer> op2 = (x, y) -> x + y;
+        
+        NavigableMap<Integer, Integer> result2 = MapMerger.merge(itThis2, itOther2, comparator2, op2, 0, 0);
+        
+        assertEquals((Integer)2, result2.get(1));
+        assertEquals((Integer)2, result2.get(2));
+        assertEquals((Integer)6, result2.get(3));
     }
 }

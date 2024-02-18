@@ -8,7 +8,6 @@ import java.util.TreeMap;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
-//protected
 final class MapMerger {
 
     public static <K, V> NavigableMap<K, V> merge(
@@ -41,12 +40,12 @@ final class MapMerger {
             BinaryOperator<V> op,
             K origin,
             V zero) {
-        Objects.requireNonNull(itThis);
-        Objects.requireNonNull(itOther);
-        Objects.requireNonNull(comparator);
-        Objects.requireNonNull(op);
-        Objects.requireNonNull(origin);
-        Objects.requireNonNull(zero);
+        assert itThis != null;
+        assert itOther != null;
+        assert comparator != null;
+        assert op != null;
+        assert origin != null;
+        assert zero != null;
 
         MergeParameters<K,V> mergeParams = new MergeParameters<K,V>(origin, zero, zero);
 
@@ -67,28 +66,28 @@ final class MapMerger {
             PeekingIterator<Entry<K, V>> itOther,
             Comparator<? super K> comparator,
             MergeParameters<K, V> mergeParameters) {
-        Objects.requireNonNull(itThis);
-        Objects.requireNonNull(itOther);
-        Objects.requireNonNull(comparator);
-        Objects.requireNonNull(mergeParameters);
+        assert itThis != null;
+        assert itOther != null;
+        assert comparator != null;
+        assert mergeParameters != null;
 
-        MergeParameters<K,V> mp = mergeParameters;
+        MergeParameters<K,V> mergeParams = mergeParameters;
         int compare = comparator.compare(itThis.element().getKey(), itOther.element().getKey());
         if(compare <= 0) {
-            mp = stepParameters(itThis, mergeParameters::setX);
+            mergeParams = stepParameters(itThis, mergeParameters::setX);
         }
         if(compare >= 0) {
-            mp = stepParameters(itOther, mp::setY);
+            mergeParams = stepParameters(itOther, mergeParams::setY);
         }
-        return mp;
+        return mergeParams;
     }
 
     private static <K, V> MergeParameters<K, V> stepParameters(
             PeekingIterator<Entry<K, V>> iterator,
             Function<Entry<K, V>, MergeParameters<K,V>> parameters
             ) {
-        Objects.requireNonNull(iterator);
-        Objects.requireNonNull(parameters);
+        assert iterator != null;
+        assert parameters != null;
 
         return parameters.apply(iterator.next());
     }
