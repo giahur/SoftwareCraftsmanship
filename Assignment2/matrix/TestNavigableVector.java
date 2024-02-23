@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.NavigableMap;
 import java.util.Map;
 import org.junit.Test;
+
 import java.util.TreeMap;
 import java.util.function.BinaryOperator;
 

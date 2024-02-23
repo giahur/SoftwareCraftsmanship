@@ -17,22 +17,19 @@ import matrix.NavigableMatrix.InvalidLengthException;
 
 public class TestNavigableMatrix {
 
-    private NavigableMatrix<Integer> myMatrix() {
-        NavigableMap<Indexes, Integer> myMap = new TreeMap<>();
-        myMap.put(new Indexes(0, 0), 1);
-        myMap.put(new Indexes(0, 1), 2);
-        myMap.put(new Indexes(1, 0), 3);
-        return new NavigableMatrix<Integer>(myMap, 0);
+    public static NavigableMatrix<Integer> myMatrix() {
+        NavigableMatrix<Integer> matrix = NavigableMatrix.instance(2, 2, (index) -> 3, 0);
+        return matrix;
     }
 
     @Test
     public void testValue() {
         NavigableMatrix<Integer> matrix = myMatrix();
-        assertEquals((Integer)1, matrix.value(new Indexes(0, 0)));
-        assertEquals((Integer)2, matrix.value(new Indexes(0, 1)));
+        assertEquals((Integer)3, matrix.value(new Indexes(0, 0)));
+        assertEquals((Integer)3, matrix.value(new Indexes(0, 1)));
         
         assertThrows(NullPointerException.class, () -> matrix.value(null));
-        assertThrows(IndexOutOfBoundsException.class, () -> matrix.value(new Indexes(1, 1)));
+        assertEquals((Integer)0, matrix.value(new Indexes(3, 1)));
     }
 
     @Test
@@ -45,9 +42,10 @@ public class TestNavigableMatrix {
     public void testRepresentation() {
         NavigableMatrix<Integer> matrix = myMatrix();
         NavigableMap<Indexes, Integer> expectedMap = new TreeMap<>();
-        expectedMap.put(new Indexes(0, 0), 1);
-        expectedMap.put(new Indexes(0, 1), 2);
+        expectedMap.put(new Indexes(0, 0), 3);
+        expectedMap.put(new Indexes(0, 1), 3);
         expectedMap.put(new Indexes(1, 0), 3);
+        expectedMap.put(new Indexes(1, 1), 3);
         assertEquals(expectedMap, matrix.representation());
     }
 
@@ -56,11 +54,12 @@ public class TestNavigableMatrix {
         NavigableMatrix<Integer> matrix = myMatrix();
         PeekingIterator<Map.Entry<Indexes, Integer>> iterator = matrix.peekingIterator();
         assertTrue(iterator.hasNext());
-        assertEquals((Integer)1, iterator.next().getValue());
-        assertEquals((Integer)2, iterator.peek().get().getValue());
-        assertEquals((Integer)2, iterator.next().getValue());
+        assertEquals((Integer)3, iterator.next().getValue());
+        assertEquals((Integer)3, iterator.peek().get().getValue());
+        assertEquals((Integer)3, iterator.next().getValue());
         assertEquals((Integer)3, iterator.element().getValue());
         assertTrue(iterator.hasNext());
+        assertEquals((Integer)3, iterator.next().getValue());
         assertEquals((Integer)3, iterator.next().getValue());
         assertFalse(iterator.hasNext());
         assertThrows(NoSuchElementException.class, () -> iterator.next());

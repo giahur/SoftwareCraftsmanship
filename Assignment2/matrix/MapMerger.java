@@ -2,7 +2,6 @@ package matrix;
 
 import java.util.Comparator;
 import java.util.NavigableMap;
-import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.function.BinaryOperator;
@@ -10,19 +9,19 @@ import java.util.function.Function;
 
 final class MapMerger {
 
-    public static <K, V> NavigableMap<K, V> merge(
+    static <K, V> NavigableMap<K, V> merge(
             PeekingIterator<Entry<K, V>> itThis,
             PeekingIterator<Entry<K, V>> itOther,
             Comparator<? super K> comparator,
             BinaryOperator<V> op,
             K origin,
             V zero) {
-        Objects.requireNonNull(itThis);
-        Objects.requireNonNull(itOther);
-        Objects.requireNonNull(comparator);
-        Objects.requireNonNull(op);
-        Objects.requireNonNull(origin);
-        Objects.requireNonNull(zero);
+        assert itThis != null;
+        assert itOther != null;
+        assert comparator != null;
+        assert op != null;
+        assert origin != null;
+        assert zero != null;
 
         NavigableMap<K, V> map = new TreeMap<>();
 

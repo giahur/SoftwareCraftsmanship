@@ -18,8 +18,8 @@ public final class NavigableVector<T> extends AbstractMatrix<Integer, T> {
     public Matrix<Integer, T> merge(Matrix<Integer, T> other, BinaryOperator<T> op) {
         Objects.requireNonNull(other);
         Objects.requireNonNull(op);
-        NavigableMap<Integer, T> map = MapMerger.merge(this.peekingIterator(), other.peekingIterator(), Comparator.naturalOrder(), op, 0, zero());
-        InconsistentZeroException.requireMatching(this, other); //call before merge
+        T newZero = InconsistentZeroException.requireMatching(this, other);
+        NavigableMap<Integer, T> map = MapMerger.merge(this.peekingIterator(), other.peekingIterator(), Comparator.naturalOrder(), op, 0, newZero);
         return new NavigableVector<T>(map, zero());
     }
 

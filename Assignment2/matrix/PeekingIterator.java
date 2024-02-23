@@ -37,7 +37,7 @@ public final class PeekingIterator<T> implements Iterator<T> {
         }
         return value;
     }
-
+ 
     public Optional<T> peek() {
         if(!hasNext()) {
             return Optional.empty();

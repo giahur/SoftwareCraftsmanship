@@ -39,6 +39,7 @@ public record Indexes(int row, int column) implements Comparable<Indexes> {
     }
 
     public <S> S value(Matrix<Indexes, S> matrix) {
+        Objects.requireNonNull(matrix);
         return matrix.value(this);
     }
 

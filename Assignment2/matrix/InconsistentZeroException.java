@@ -25,13 +25,10 @@ public final class InconsistentZeroException extends Exception {
         Objects.requireNonNull(thisMatrix);
         Objects.requireNonNull(otherMatrix);
         
-        T thisZero = thisMatrix.zero();
-        T otherZero = otherMatrix.zero();
-        
-        if (!thisZero.equals(otherZero)) {
-            throw new IllegalArgumentException(new InconsistentZeroException(thisZero.toString(), otherZero.toString()));
+        if (!thisMatrix.zero().equals(otherMatrix.zero())) {
+            throw new IllegalArgumentException(new InconsistentZeroException(thisMatrix.zero().toString(), otherMatrix.zero().toString()));
         }
 
-        return thisZero;
+        return thisMatrix.zero();
     }
 }

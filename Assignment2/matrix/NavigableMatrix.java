@@ -9,30 +9,24 @@ import java.util.TreeMap;
 import java.util.Objects;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public final class NavigableMatrix<T> implements Matrix<Indexes, T> {
     
-    //private final NavigableMap<Indexes, T> matrix; delete??
     private final T zero;
-    private final NavigableMap<Indexes, T> matrixByColumns;
     private final NavigableMap<Indexes, T> matrixByRows;
+    private final NavigableMap<Indexes, T> matrixByColumns;
     
-    protected NavigableMatrix(NavigableMap<Indexes, T> matrixByRows, T zero) {
-        this.matrixByRows = Collections.unmodifiableNavigableMap(matrixByRows);
+    protected NavigableMatrix(T zero, NavigableMap<Indexes, T> matrixByRows, NavigableMap<Indexes, T> matrixByColumns) {
         this.zero = zero;
-
-        //CHANGE THIS... maybe helper method w argument matrixByRows
-        this.matrixByColumns = Collections.unmodifiableNavigableMap(matrixByRows);
+        this.matrixByRows = Collections.unmodifiableNavigableMap(matrixByRows);
+        this.matrixByColumns = Collections.unmodifiableNavigableMap(matrixByColumns);
     }
 
     @Override
     public T value(Indexes indexes) {
-        Objects.requireNonNull(indexes);
-        if(!matrix.containsKey(indexes)) {
-            throw new IndexOutOfBoundsException("Indexes don't exist");
-        }
-        return matrix.get(indexes);
+        return matrixByRows.getOrDefault(indexes, zero());
     }
 
     @Override
@@ -42,19 +36,21 @@ public final class NavigableMatrix<T> implements Matrix<Indexes, T> {
 
     @Override
     public NavigableMap<Indexes, T> representation() {
-        return Collections.unmodifiableNavigableMap(matrix); //change to matrixByColumns/Rows?
+        return Collections.unmodifiableNavigableMap(matrixByRows); //change to matrixByColumns/Rows?
     }
 
     @Override
-    public PeekingIterator<Map.Entry<Indexes,T>> peekingIterator() {
-        return PeekingIterator.from(matrix.entrySet());
+    public PeekingIterator<Map.Entry<Indexes, T>> peekingIterator() {
+        return PeekingIterator.from(matrixByRows.entrySet());
     }
 
     @Override
     public Matrix<Indexes, T> merge(Matrix<Indexes, T> other, BinaryOperator<T> op) {
-        NavigableMap<Indexes, T> map = MapMerger.merge(this.peekingIterator(), other.peekingIterator(), Comparator.naturalOrder(), op, Indexes.ORIGIN, zero());
-        InconsistentZeroException.requireMatching(this, other);
-        return new NavigableMatrix<T>(map, zero);
+        Objects.requireNonNull(other);
+        Objects.requireNonNull(op);
+        T newZero = InconsistentZeroException.requireMatching(this, other);
+        NavigableMap<Indexes, T> map = MapMerger.merge(this.peekingIterator(), other.peekingIterator(), Comparator.naturalOrder(), op, Indexes.ORIGIN, newZero);
+        return new NavigableMatrix<T>(zero, map, matrixByCol(map));
     }
 
     public static class InvalidLengthException extends Exception {
@@ -89,31 +85,32 @@ public final class NavigableMatrix<T> implements Matrix<Indexes, T> {
         }
     }
 
+    private static <S> TreeMap<Indexes, S> matrixByCol(Map<Indexes, S> map) {
+        assert map != null;
+        TreeMap<Indexes, S> newColMap = new TreeMap<Indexes, S>(Indexes.byColumns);
+        newColMap.putAll(map);
+        return newColMap;
+    }
+
     // returns entries where row = i, keys are columns
     public NavigableVector<T> row(int i) {
-        NavigableMap<Integer, T> rowMap = matrixByColumns.entrySet()
-                                                .stream()
-                                                .filter(entry -> entry.getKey().row() == i)
-                                                .collect(Collectors.toMap(entry -> entry.getKey().column(), Entry::getValue, (a,b) -> a, TreeMap::new));
-        return new NavigableVector<T>(rowMap, zero);
+        return rowColumn(matrixByRows, entry -> entry.getKey().row() == i, entry -> entry.getKey().column());
     }
 
     public NavigableVector<T> column(int j) {
-        NavigableMap<Integer, T> columnMap = matrixByRows.entrySet()
-                                                .stream()
-                                                .filter(entry -> entry.getKey().column() == j)
-                                                .collect(Collectors.toMap(entry -> entry.getKey().row(), Entry::getValue, (a,b) -> a, TreeMap::new));
-        return new NavigableVector<T>(columnMap, zero);
+        return rowColumn(matrixByColumns, entry -> entry.getKey().column() == j, entry -> entry.getKey().row());
     }
 
-    //repeated code??
-    /*public NavigableVector<T> rowColumn(NavigableMap<Indexes, T> matrixBy, int rowColumn, int ij, int columnRow) {
-        NavigableMap<Integer, T> rowColumnMap = matrixBy.entrySet()
+
+    public NavigableVector<T> rowColumn(NavigableMap<Indexes, T> matrixBy, Predicate<Entry<Indexes, T>> predicateFilter, Function<Entry<Indexes, T>, Integer> functionCollect) {
+        Objects.requireNonNull(matrixBy);
+        Objects.requireNonNull(predicateFilter);
+        Objects.requireNonNull(functionCollect); 
+        return NavigableVector.from(matrixBy.entrySet()
                                                 .stream()
-                                                .filter(entry -> entry.getKey().rowColumn == ij)
-                                                .collect(Collectors.toMap(entry -> entry.getKey().columnRow, Entry::getValue, (a,b) -> a, TreeMap::new));
-        return new NavigableVector<T>(rowColumnMap, zero);
-    } */
+                                                .filter(predicateFilter)
+                                                .collect(Collectors.toMap(functionCollect, Entry::getValue, (a,b) -> a, TreeMap::new)), zero());
+    } 
 
     public static <S> NavigableMatrix<S> instance(int rows, int columns, Function<Indexes, S> valueMapper, S zero) {
         Objects.requireNonNull(valueMapper);
@@ -125,7 +122,7 @@ public final class NavigableMatrix<T> implements Matrix<Indexes, T> {
         Map<Indexes, S> myMap = Indexes.stream(rows, columns)
                 .filter(x -> !valueMapper.apply(x).equals(zero))
                 .collect(Collectors.toMap(x -> x, x -> valueMapper.apply((Indexes) x)));
-        return new NavigableMatrix<S>(new TreeMap<Indexes, S>(myMap), zero);
+        return new NavigableMatrix<S>(zero, new TreeMap<Indexes, S>(myMap), matrixByCol(myMap));
     }
 
     public static <S> NavigableMatrix<S> constant(int rows, int columns, S value, S zero) {
@@ -146,7 +143,7 @@ public final class NavigableMatrix<T> implements Matrix<Indexes, T> {
         Objects.requireNonNull(matrix);
         Objects.requireNonNull(zero);
 
-        return new NavigableMatrix<S>(matrix, zero);
+        return new NavigableMatrix<S>(zero, matrix, matrixByCol(matrix));
     }
     
     public static <S> NavigableMatrix<S> from(S[][] matrix, S zero) {
