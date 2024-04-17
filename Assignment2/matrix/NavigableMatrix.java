@@ -85,6 +85,7 @@ public final class NavigableMatrix<T> implements Matrix<Indexes, T> {
         }
     }
 
+//sounds like getter.... but private....... 
     private static <S> TreeMap<Indexes, S> matrixByCol(Map<Indexes, S> map) {
         assert map != null;
         TreeMap<Indexes, S> newColMap = new TreeMap<Indexes, S>(Indexes.byColumns);
@@ -93,6 +94,7 @@ public final class NavigableMatrix<T> implements Matrix<Indexes, T> {
     }
 
     // returns entries where row = i, keys are columns
+    // .getKey().row() can be in predicatefilter
     public NavigableVector<T> row(int i) {
         return rowColumn(matrixByRows, entry -> entry.getKey().row() == i, entry -> entry.getKey().column());
     }
@@ -101,11 +103,11 @@ public final class NavigableMatrix<T> implements Matrix<Indexes, T> {
         return rowColumn(matrixByColumns, entry -> entry.getKey().column() == j, entry -> entry.getKey().row());
     }
 
-
-    public NavigableVector<T> rowColumn(NavigableMap<Indexes, T> matrixBy, Predicate<Entry<Indexes, T>> predicateFilter, Function<Entry<Indexes, T>, Integer> functionCollect) {
-        Objects.requireNonNull(matrixBy);
-        Objects.requireNonNull(predicateFilter);
-        Objects.requireNonNull(functionCollect); 
+//submaps
+    private NavigableVector<T> rowColumn(NavigableMap<Indexes, T> matrixBy, Predicate<Entry<Indexes, T>> predicateFilter, Function<Entry<Indexes, T>, Integer> functionCollect) {
+        assert matrixBy != null;
+        assert predicateFilter != null;
+        assert functionCollect != null; 
         return NavigableVector.from(matrixBy.entrySet()
                                                 .stream()
                                                 .filter(predicateFilter)
